@@ -3,7 +3,6 @@ const FormData = require('form-data');
 const fs = require('fs');
 const { exit } = require("process");
 
-
 const serverID = process.env.PLEX_SERVER_ID;
 const token = process.env.PLEX_SERVER_TOKEN;
 const endDir = "/config";
