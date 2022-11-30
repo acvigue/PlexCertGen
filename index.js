@@ -67,21 +67,22 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                 console.log(`CSR uploaded for ${commonName}.`);
 
                 //do loop waiting for cert
-                const dlInterval = setInterval(() => {
-
-                    axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/download`, {
-                        headers: plexHeaders
-                    }).then((certDownloadResp) => {
-                        if(certDownloadResp.status == 200) {
-                            clearInterval(dlInterval);
-                            fs.writeFileSync(`${endDir}/fullchain.pem`, certDownloadResp.data.toString());
-                            fs.copyFileSync("./privkey.pem", `${endDir}/privkey.pem`);
-                            fs.unlinkSync("./req.csr");
-                            console.log(`Certificate downloaded`);
-                        } else {
-                            console.log(`Certificate for ${commonName} not ready yet (${certDownloadResp.status})`);
-                        }
-                    })
+                setTimeout(() => {
+                    const dlInterval = setInterval(() => {
+                        axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/download`, {
+                            headers: plexHeaders
+                        }).then((certDownloadResp) => {
+                            if(certDownloadResp.status == 200) {
+                                clearInterval(dlInterval);
+                                fs.writeFileSync(`${endDir}/fullchain.pem`, certDownloadResp.data.toString());
+                                fs.copyFileSync("./privkey.pem", `${endDir}/privkey.pem`);
+                                fs.unlinkSync("./req.csr");
+                                console.log(`Certificate downloaded`);
+                            } else {
+                                console.log(`Certificate for ${commonName} not ready yet (${certDownloadResp.status})`);
+                            }
+                        })
+                    }, 3000);
                 }, 3000);
             }
         }).catch((err) => {
