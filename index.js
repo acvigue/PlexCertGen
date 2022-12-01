@@ -83,10 +83,10 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                             }
                         })
                     }, 3000);
-                }, 3000);
+                }, 15000);
             }
         }).catch((err) => {
-            console.log("Error uploading cert", err.status);
+            console.log("Error uploading cert", err);
             exit;
         })
     });
