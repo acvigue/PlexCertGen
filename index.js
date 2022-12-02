@@ -6,7 +6,7 @@ const forge = require("node-forge");
 
 const serverID = process.env.PLEX_SERVER_ID;
 const token = process.env.PLEX_SERVER_TOKEN;
-const endDir = ".";
+const endDir = "/config";
 
 try {
     let cert = forge.pki.certificateFromPem(fs.readFileSync(`${endDir}/fullchain.pem`));
@@ -47,13 +47,12 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
         value: commonName
     }]);
 
-    csr.sign(keys.privateKey);
+    csr.sign(keys.privateKey, forge.md.sha256.create());
     console.log('CSR signed');
 
     const formData = new FormData();
     formData.append('file', forge.pki.certificationRequestToPem(csr));
-    console.log(forge.pki.certificationRequestToPem(csr));
-    exit();
+
     axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
         headers: { ...plexHeaders, ...formData.getHeaders()}
     }).then((csrPostResp) => {
