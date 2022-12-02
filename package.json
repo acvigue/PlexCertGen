@@ -1,5 +1,5 @@
 {
-  "name": "plexca",
+  "name": "plex-cert-gen",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,6 +11,6 @@
   "dependencies": {
     "axios": "^0.26.0",
     "form-data": "^4.0.0",
-    "openssl-wrapper": "^0.3.4"
+    "node-forge": "^1.3.1"
   }
 }
