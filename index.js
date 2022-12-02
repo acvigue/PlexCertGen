@@ -34,6 +34,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
 
     csr.setSubject([{
         name: 'commonName',
+        valueTagClass: forge.asn1.Type.UTF8,
         value: commonName
     }]);
 
@@ -42,8 +43,8 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
 
     const formData = new FormData();
     formData.append('file', forge.pki.certificationRequestToPem(csr));
-    console.log(forge.pki.certificationRequestToPem(csr));
-    /*
+    //console.log(forge.pki.certificationRequestToPem(csr));
+    
     axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
         headers: { ...plexHeaders, ...formData.getHeaders()}
     }).then((csrPostResp) => {
@@ -64,12 +65,11 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                         console.log(`Certificate not ready yet (${certDownloadResp.status})`);
                     }
                 }).catch((err) => {
-                    console.log(`Download returned error ${err.status}`);
+                    console.log(`Download returned error`, err.response);
                 })
             }, 3000);
         }
     }).catch((err) => {
         console.log("Error uploading cert", err);
     })
-    */
 })
