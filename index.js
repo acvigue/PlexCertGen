@@ -52,7 +52,6 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
 
     const formData = new FormData();
     formData.append('file', forge.pki.certificationRequestToPem(csr));
-
     axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
         headers: { ...plexHeaders, ...formData.getHeaders()}
     }).then((csrPostResp) => {
