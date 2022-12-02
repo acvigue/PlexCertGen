@@ -42,9 +42,9 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     console.log('CSR signed');
 
     const formData = new FormData();
-    formData.append('file', forge.pki.certificationRequestToPem(csr));
-    //console.log(forge.pki.certificationRequestToPem(csr));
-    
+    formData.append('file', forge.pki.certificationRequestToPem(csr) + "\n");
+    console.log(forge.pki.certificationRequestToPem(csr));
+    //exit();
     axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
         headers: { ...plexHeaders, ...formData.getHeaders()}
     }).then((csrPostResp) => {
@@ -65,7 +65,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                         console.log(`Certificate not ready yet (${certDownloadResp.status})`);
                     }
                 }).catch((err) => {
-                    console.log(`Download returned error`, err.response);
+                    console.log(`Download returned error`, err);
                 })
             }, 3000);
         }
