@@ -27,7 +27,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     const child = spawn('/usr/bin/openssl', ['req','-nodes','-newkey','rsa:2048','-keyout',`${endDir}/privkey.pem`,'-out',`${endDir}/req.csr`]);
 
     child.stderr.on('data', (data) => {
-        console.log(data.toString());
+        //console.log(data.toString());
         if(data.indexOf("Country Name") != -1) {
             child.stdin.write("\n");
         }
@@ -57,12 +57,15 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
         }
     });
 
+    let plexHeadersCopy = plexHeaders;
+
     child.on('close', (code) => {
-        console.log(`CSR generated for ${commonName}: ${code}`);
+        console.log(`CSR generated for ${commonName}: exit code ${code}`);
         const formData = new FormData();
         formData.append('file', fs.createReadStream(`${endDir}/req.csr`));
+        fs.unlinkSync(`${endDir}/req.csr`);
         axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
-            headers: Object.assign(plexHeaders, formData.getHeaders())
+            headers: Object.assign(plexHeadersCopy, formData.getHeaders())
         }).then((csrPostResp) => {
             if(csrPostResp.status == 204) {
                 console.log(`CSR uploaded for ${commonName}.`);
@@ -76,7 +79,6 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                             if(certDownloadResp.status == 200) {
                                 clearInterval(dlInterval);
                                 fs.writeFileSync(`${endDir}/fullchain.pem`, certDownloadResp.data.toString());
-                                fs.unlinkSync(`${endDir}/req.csr`);
                                 console.log(`Certificate downloaded`);
                             } else {
                                 console.log(`Certificate for ${commonName} not ready yet (${certDownloadResp.status})`);
@@ -87,7 +89,6 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
             }
         }).catch((err) => {
             console.log("Error uploading cert", err);
-            exit;
         })
     });
 })
