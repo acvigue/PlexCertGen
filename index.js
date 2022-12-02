@@ -6,7 +6,17 @@ const forge = require("node-forge");
 
 const serverID = process.env.PLEX_SERVER_ID;
 const token = process.env.PLEX_SERVER_TOKEN;
-const endDir = "./";
+const endDir = ".";
+
+try {
+    let cert = forge.pki.certificateFromPem(fs.readFileSync(`${endDir}/fullchain.pem`));
+    if(new Date().getTime() < cert.validity.notAfter.getTime() - (86400*1000*14)) {
+        console.log("certificate not expiring soon - exiting");
+        exit();
+    }
+} catch(e) {
+    console.log("couldn't check certificate expiry", e);
+}
 
 const plexHeaders = {
     "Accept": "*\/*",
@@ -20,7 +30,6 @@ const plexHeaders = {
 
 console.log('Generating 2048-bit key-pair...');
 let keys = forge.pki.rsa.generateKeyPair(2048);
-console.log('Key-pair created.');
 
 axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     headers: plexHeaders
@@ -42,7 +51,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     console.log('CSR signed');
 
     const formData = new FormData();
-    formData.append('file', forge.pki.certificationRequestToPem(csr) + "\n");
+    formData.append('file', forge.pki.certificationRequestToPem(csr));
     console.log(forge.pki.certificationRequestToPem(csr));
     //exit();
     axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
