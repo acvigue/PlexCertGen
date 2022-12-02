@@ -27,6 +27,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     const child = spawn('/usr/bin/openssl', ['req','-nodes','-newkey','rsa:2048','-keyout',`privkey.pem`,'-out',`req.csr`]);
 
     child.stderr.on('data', (data) => {
+        console.log(data);
         if(data.indexOf("Country Name") != -1) {
             child.stdin.write("\n");
         }
@@ -57,7 +58,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     });
 
     child.on('close', (code) => {
-        console.log(`CSR generated for ${commonName}`);
+        console.log(`CSR generated for ${commonName}: ${code}`);
         const formData = new FormData();
         formData.append('file', fs.createReadStream(`./req.csr`));
         axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
