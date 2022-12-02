@@ -24,7 +24,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     commonName = resp.data.split("commonName=\"")[1].split("\"")[0];
 
     const spawn = require('child_process').spawn;
-    const child = spawn('/usr/bin/openssl', ['req','-nodes','-newkey','rsa:2048','-keyout',`privkey.pem`,'-out',`req.csr`]);
+    const child = spawn('/usr/bin/openssl', ['req','-nodes','-newkey','rsa:2048','-keyout',`privkey.pem`,'-out',`${endDir}/req.csr`]);
 
     child.stderr.on('data', (data) => {
         if(data.indexOf("Country Name") != -1) {
@@ -59,7 +59,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
     child.on('close', (code) => {
         console.log(`CSR generated for ${commonName}`);
         const formData = new FormData();
-        formData.append('file', fs.createReadStream(`./req.csr`));
+        formData.append('file', fs.createReadStream(`${endDir}/req.csr`));
         axios.put(`https://plex.tv/api/v2/devices/${serverID}/certificate/csr?reason=missing&invalidIn=0`, formData, {
             headers: Object.assign(plexHeaders, formData.getHeaders())
         }).then((csrPostResp) => {
@@ -76,7 +76,7 @@ axios.get(`https://plex.tv/api/v2/devices/${serverID}/certificate/subject`, {
                                 clearInterval(dlInterval);
                                 fs.writeFileSync(`${endDir}/fullchain.pem`, certDownloadResp.data.toString());
                                 fs.copyFileSync("./privkey.pem", `${endDir}/privkey.pem`);
-                                fs.unlinkSync("./req.csr");
+                                fs.unlinkSync(`${endDir}/req.csr`);
                                 console.log(`Certificate downloaded`);
                             } else {
                                 console.log(`Certificate for ${commonName} not ready yet (${certDownloadResp.status})`);
