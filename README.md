@@ -7,3 +7,5 @@ pass env vars to container
 
 - PLEX_SERVER_ID: plex server id
 - PLEX_SERVER_TOKEN: plex server token (find in Preferences.xml or devices.xml in web inspector on app.plex.tv)
+
+Run container whenever, it will only recreate cert when <14 days to expiry date.
